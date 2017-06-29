@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE  mapper  PUBLIC  "-//mybatis.org//DTD  Mapper  3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="core">
+	<!-- 排序分页 -->
+	<sql id="page_condition">
+		<if test="orderbyField != null">
+			<![CDATA[order by ]]>
+			<foreach collection="orderbyField" index="col" item="val" separator=",">
+				<![CDATA[${col} ${val}]]>
+			</foreach>
+		</if>
+		<choose>
+			<when test="startIdx != null and pageSize != null"><![CDATA[limit #{startIdx},#{pageSize} ]]></when>
+			<when test="pageSize != null"><![CDATA[limit 0,#{pageSize} ]]></when>
+			<otherwise></otherwise>
+		</choose>
+	</sql>
+
+	<!-- 查询条件 -->
+	<sql id="where_condition">
+		<where>
+			<if test="gtField != null">
+				<foreach collection="gtField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} > #{val}]]></if></foreach>
+			</if>
+			<if test="gteField != null">
+				<foreach collection="gteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} >= #{val}]]></if></foreach>
+			</if>
+			<if test="ltField != null">
+				<foreach collection="ltField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} < #{val}]]></if></foreach>
+			</if>
+			<if test="lteField != null">
+				<foreach collection="lteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} <= #{val}]]></if></foreach>
+			</if>
+			<if test="eqField != null">
+				<foreach collection="eqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} = #{val}]]></if></foreach>
+			</if>
+			<if test="neqField != null">
+				<foreach collection="neqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} != #{val}]]></if></foreach>
+			</if>
+			<if test="nullField != null">
+				<foreach collection="nullField" item="val"><![CDATA[ and ${val} is null]]></foreach>
+			</if>
+			<if test="notNullField != null">
+				<foreach collection="notNullField" item="val"><![CDATA[ and ${val} is not null]]></foreach>
+			</if>
+			<if test="likeField != null">
+				<foreach collection="likeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} like #{val}]]></if></foreach>
+			</if>
+			<if test="notLikeField != null">
+				<foreach collection="notLikeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} not like #{val}]]></if></foreach>
+			</if>
+			<if test="betweenField != null">
+				<foreach collection="betweenField" index="col" item="val">
+					<if test="val.minVal != '' and val.maxVal != ''">
+						<![CDATA[ and ${col} between #{val.minVal} and #{val.maxVal}]]>
+					</if>
+				</foreach>
+			</if>
+			<if test="notBetweenField != null">
+				<foreach collection="notBetweenField" index="col" item="val">
+					<if test="val.minVal != '' and val.maxVal != ''">
+						<![CDATA[ and ${col} not between #{val.minVal} and #{val.maxVal}]]>
+					</if>
+				</foreach>
+			</if>
+			<if test="inField != null">
+				<foreach collection="inField" index="col" item="valList">
+					<![CDATA[ and ${col} in ]]>
+					<foreach collection="valList" item="val" separator="," open="(" close=")">
+						<if test="val != null and val != ''">#{val}</if>
+					</foreach>
+				</foreach>
+			</if>
+			<if test="notInField != null">
+				<foreach collection="notInField" index="col" item="valList">
+					<![CDATA[ and ${col} not in ]]>
+					<foreach collection="valList" item="val" separator="," open="(" close=")">
+						<if test="val != null and val != ''">#{val}</if>
+					</foreach>
+				</foreach>
+			</if>
+			<if test="groups != null">
+				<foreach collection="groups" item="group">
+					<![CDATA[ and (]]>
+					<include refid="core.where_group"></include>
+					<![CDATA[ )]]>
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 分组条件 -->
+	<sql id="where_group">
+		<![CDATA[1 = 1]]>
+		<if test="group.gtField != null">
+			<foreach collection="group.gtField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} > #{val}]]></if></foreach>
+		</if>
+		<if test="group.gteField != null">
+			<foreach collection="group.gteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} >= #{val}]]></if></foreach>
+		</if>
+		<if test="group.ltField != null">
+			<foreach collection="group.ltField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} < #{val}]]></if></foreach>
+		</if>
+		<if test="group.lteField != null">
+			<foreach collection="group.lteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} <= #{val}]]></if></foreach>
+		</if>
+		<if test="group.eqField != null">
+			<foreach collection="group.eqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} = #{val}]]></if></foreach>
+		</if>
+		<if test="group.neqField != null">
+			<foreach collection="group.neqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} != #{val}]]></if></foreach>
+		</if>
+		<if test="group.nullField != null">
+			<foreach collection="group.nullField" item="val"><![CDATA[ and ${val} is null]]></foreach>
+		</if>
+		<if test="group.notNullField != null">
+			<foreach collection="group.notNullField" item="val"><![CDATA[ and ${val} is not null]]></foreach>
+		</if>
+		<if test="group.likeField != null">
+			<foreach collection="group.likeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} like #{val}]]></if></foreach>
+		</if>
+		<if test="group.notLikeField != null">
+			<foreach collection="group.notLikeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} not like #{val}]]></if></foreach>
+		</if>
+		<if test="group.betweenField != null">
+			<foreach collection="group.betweenField" index="col" item="val">
+				<if test="(val.minVal != '') and (val.maxVal != '')">
+					<![CDATA[ and ${col} between #{val.minVal} and #{val.maxVal}]]>
+				</if>
+			</foreach>
+		</if>
+		<if test="group.notBetweenField != null">
+			<foreach collection="group.notBetweenField" index="col" item="val">
+				<if test="(val.minVal != '') and (val.maxVal != '')">
+					<![CDATA[ and ${col} not between #{val.minVal} and #{val.maxVal}]]>
+				</if>
+			</foreach>
+		</if>
+		<if test="group.inField != null">
+			<foreach collection="group.inField" index="col" item="valList">
+				<![CDATA[ and ${col} in ]]>
+				<foreach collection="valList" item="val" separator="," open="(" close=")">
+					<if test="val != null and val != ''">#{val}</if>
+				</foreach>
+			</foreach>
+		</if>
+		<if test="group.notInField != null">
+			<foreach collection="group.notInField" index="col" item="valList">
+				<![CDATA[ and ${col} not in ]]>
+				<foreach collection="valList" item="val" separator="," open="(" close=")">
+					<if test="val != null and val != ''">#{val}</if>
+				</foreach>
+			</foreach>
+		</if>
+	</sql>
+
+	<!-- 查询条件,参数名为:criterion -->
+	<sql id="where_condition_pre_con">
+		<where>
+			<if test="criterion.gtField != null">
+				<foreach collection="criterion.gtField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} > #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.gteField != null">
+				<foreach collection="criterion.gteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} >= #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.ltField != null">
+				<foreach collection="criterion.ltField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} < #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.lteField != null">
+				<foreach collection="criterion.lteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} <= #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.eqField != null">
+				<foreach collection="criterion.eqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} = #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.neqField != null">
+				<foreach collection="criterion.neqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} != #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.nullField != null">
+				<foreach collection="criterion.nullField" item="val"><![CDATA[ and ${val} is null]]></foreach>
+			</if>
+			<if test="criterion.notNullField != null">
+				<foreach collection="criterion.notNullField" item="val"><![CDATA[ and ${val} is not null]]></foreach>
+			</if>
+			<if test="criterion.likeField != null">
+				<foreach collection="criterion.likeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} like #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.notLikeField != null">
+				<foreach collection="criterion.notLikeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} not like #{val}]]></if></foreach>
+			</if>
+			<if test="criterion.betweenField != null">
+				<foreach collection="criterion.betweenField" index="col" item="val">
+					<if test="(val.minVal != '') and (val.maxVal != '')">
+						<![CDATA[ and ${col} between #{val.minVal} and #{val.maxVal}]]>
+					</if>
+				</foreach>
+			</if>
+			<if test="criterion.notBetweenField != null">
+				<foreach collection="criterion.notBetweenField" index="col" item="val">
+					<if test="(val.minVal != '') and (val.maxVal != '')">
+					<![CDATA[ and ${col} not between #{val.minVal} and #{val.maxVal}]]>
+					</if>
+				</foreach>
+			</if>
+			<if test="criterion.inField != null">
+				<foreach collection="criterion.inField" index="col" item="valList">
+					<![CDATA[ and ${col} in ]]>
+					<foreach collection="valList" item="val" separator="," open="(" close=")">
+						<if test="val != null and val != ''">#{val}</if>
+					</foreach>
+				</foreach>
+			</if>
+			<if test="criterion.notInField != null">
+				<foreach collection="criterion.notInField" index="col" item="valList">
+					<![CDATA[ and ${col} not in ]]>
+					<foreach collection="valList" item="val" separator="," open="(" close=")">
+						<if test="val != null and val != ''">#{val}</if>
+					</foreach>
+				</foreach>
+			</if>
+			<if test="criterion.groups != null">
+				<foreach collection="criterion.groups" item="group">
+					<![CDATA[ and (]]>
+					<include refid="core.where_group_pre_con"></include>
+					<![CDATA[ )]]>
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 分组条件,参数名为:criterion -->
+	<sql id="where_group_pre_con">
+		<![CDATA[1 = 1]]>
+		<if test="criterion.group.gtField != null">
+			<foreach collection="criterion.group.gtField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} > #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.gteField != null">
+			<foreach collection="criterion.group.gteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} >= #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.ltField != null">
+			<foreach collection="criterion.group.ltField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} < #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.lteField != null">
+			<foreach collection="criterion.group.lteField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} <= #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.eqField != null">
+			<foreach collection="criterion.group.eqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} = #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.neqField != null">
+			<foreach collection="criterion.group.neqField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} != #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.nullField != null">
+			<foreach collection="criterion.group.nullField" item="val"><![CDATA[ and ${val} is null]]></foreach>
+		</if>
+		<if test="criterion.group.notNullField != null">
+			<foreach collection="criterion.group.notNullField" item="val"><![CDATA[ and ${val} is not null]]></foreach>
+		</if>
+		<if test="criterion.group.likeField != null">
+			<foreach collection="criterion.group.likeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} like #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.notLikeField != null">
+			<foreach collection="criterion.group.notLikeField" index="col" item="val"><if test="val != null and val != ''"><![CDATA[ and ${col} not like #{val}]]></if></foreach>
+		</if>
+		<if test="criterion.group.betweenField != null">
+			<foreach collection="criterion.group.betweenField" index="col" item="val">
+				<if test="(val.minVal != '') and (val.maxVal != '')">
+					<![CDATA[ and ${col} between #{val.minVal} and #{val.maxVal}]]>
+				</if>
+			</foreach>
+		</if>
+		<if test="group.criterion.notBetweenField != null">
+			<foreach collection="group.criterion.notBetweenField" index="col" item="val">
+				<if test="(val.minVal != '') and (val.maxVal != '')">
+					<![CDATA[ and ${col} not between #{val.minVal} and #{val.maxVal}]]>
+				</if>
+			</foreach>
+		</if>
+		<if test="criterion.group.inField != null">
+			<foreach collection="criterion.group.inField" index="col" item="valList">
+				<![CDATA[ and ${col} in ]]>
+				<foreach collection="valList" item="val" separator="," open="(" close=")">
+					<if test="val != null and val != ''">#{val}</if>
+				</foreach>
+			</foreach>
+		</if>
+		<if test="criterion.group.notInField != null">
+			<foreach collection="criterion.group.notInField" index="col" item="valList">
+				<![CDATA[ and ${col} not in ]]>
+				<foreach collection="valList" item="val" separator="," open="(" close=")">
+					<if test="val != null and val != ''">#{val}</if>
+				</foreach>
+			</foreach>
+		</if>
+	</sql>
+
+</mapper>
