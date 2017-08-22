@@ -1,8 +1,11 @@
 package com.lw.datacrab.db.criterion;
 
+import com.google.common.collect.Lists;
 import com.lw.datacrab.db.annotation.DbColumn;
 import com.lw.datacrab.db.annotation.DbTable;
 import com.lw.datacrab.db.exception.DataCrabDbConditionException;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -17,6 +20,8 @@ import java.util.regex.Pattern;
  * @author lw
  * @date 2015-4-17 11:29:26
  */
+@ToString
+@Getter
 public class DbQueryCriterion implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
@@ -712,6 +717,25 @@ public class DbQueryCriterion implements Serializable, Cloneable {
         return this;
     }
 
+
+    /**
+     * 字段统计
+     *
+     * @param fieldName 字段名
+     * @return
+     * @throws DataCrabDbConditionException
+     */
+    public DbQueryCriterion groupBy(String fieldName) throws DataCrabDbConditionException {
+        String columnName = col(fieldName);
+        if (null == this.groupByField) {
+            groupByField = Lists.newArrayList();
+        }
+
+        groupByField.add(columnName);
+        return this;
+    }
+
+
     /**
      * 按字段正向排序
      *
@@ -773,8 +797,8 @@ public class DbQueryCriterion implements Serializable, Cloneable {
     /**
      * 构建分页对象
      *
-     * @param pageNo     当前页码
-     * @param pageSize   分页大小
+     * @param pageNo   当前页码
+     * @param pageSize 分页大小
      * @return
      */
     public DbQueryCriterion page(long pageNo, int pageSize) {
@@ -1024,127 +1048,6 @@ public class DbQueryCriterion implements Serializable, Cloneable {
         }
     }
 
-    //---------------------------------------------------------------------------------------
-
-    public Map<String, Object> getGtField() {
-        return gtField;
-    }
-
-    public Map<String, Object> getGteField() {
-        return gteField;
-    }
-
-    public Map<String, Object> getLtField() {
-        return ltField;
-    }
-
-    public Map<String, Object> getLteField() {
-        return lteField;
-    }
-
-    public Map<String, Object> getEqField() {
-        return eqField;
-    }
-
-    public Map<String, Object> getNeqField() {
-        return neqField;
-    }
-
-    public Map<String, List<?>> getInField() {
-        return inField;
-    }
-
-    public Map<String, List<?>> getNotInField() {
-        return notInField;
-    }
-
-    public List<String> getNullField() {
-        return nullField;
-    }
-
-    public List<String> getNotNullField() {
-        return notNullField;
-    }
-
-    public Map<String, String> getLikeField() {
-        return likeField;
-    }
-
-    public Map<String, String> getNotLikeField() {
-        return notLikeField;
-    }
-
-    public Map<String, DbQueryBoundary> getBetweenField() {
-        return betweenField;
-    }
-
-    public Map<String, DbQueryBoundary> getNotBetweenField() {
-        return notBetweenField;
-    }
-
-    public Map<String, Object> getPlusParam() {
-        return plusParam;
-    }
-
-    public List<Map<String, Object>> getGroups() {
-        return groups;
-    }
-
-    public Map<String, String> getOrderbyField() {
-        return orderbyField;
-    }
-
-    public String getDistinctField() {
-        if (distinctFieldList != null && distinctFieldList.size() > 0) {
-            StringBuilder dstBuilder = new StringBuilder();
-            for (int i = 0; i < distinctFieldList.size(); i++) {
-                String df = distinctFieldList.get(i);
-                if ("*".equals(df)) {
-                    return "*";
-                } else {
-                    dstBuilder.append(df).append(",");
-                }
-            }
-            return dstBuilder.deleteCharAt(dstBuilder.length() - 1).toString();
-        }
-        return null;
-    }
-
-    public Map<String, String> getColumnMap() {
-        return columnMap;
-    }
-
-    public List<String> getDistinctFieldList() {
-        return distinctFieldList;
-    }
-
-    public Map<Class<?>, Map<String, String>> getExtColumnMap() {
-        return extColumnMap;
-    }
-
-    public Long getPageNo() {
-        return pageNo;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public Long getDataAmount() {
-        return dataAmount;
-    }
-
-    public Long getStartIdx() {
-        return startIdx;
-    }
-
-    public Long getEndIdx() {
-        return endIdx;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
 
     //---------------------------------------------------------------------------------------
 
@@ -1203,6 +1106,9 @@ public class DbQueryCriterion implements Serializable, Cloneable {
 
     //排序字段
     protected Map<String, String> orderbyField;
+
+    //统计字段
+    protected List<String> groupByField;
 
     //去重字段
     protected List<String> distinctFieldList;
@@ -1415,6 +1321,7 @@ public class DbQueryCriterion implements Serializable, Cloneable {
             qc.plusParam = copyMapObj(this.getPlusParam());
             qc.groups = copyListMap(this.getGroups());
             qc.orderbyField = copyMapStrSorted(this.getOrderbyField());
+            qc.groupByField = copyListStr(this.getGroupByField());
             qc.distinctFieldList = copyListStr(this.getDistinctFieldList());
             qc.distinctField = this.getDistinctField();
             qc.columnMap = copyMapStr(this.getColumnMap());
@@ -1757,54 +1664,5 @@ public class DbQueryCriterion implements Serializable, Cloneable {
     }
 
     // ---- set 方法提供转换操作 end
-
-
-    //---------------------------------------------------------------------------------------
-
-    @Override
-    public String toString() {
-        return this.info();
-    }
-
-    /**
-     * 返回详细信息
-     *
-     * @return
-     */
-    public String info() {
-        return "DbQueryCriterion{" +
-                "entityClass=" + entityClass +
-                ", transZero=" + transZero +
-                ", gtField=" + gtField +
-                ", gteField=" + gteField +
-                ", ltField=" + ltField +
-                ", lteField=" + lteField +
-                ", eqField=" + eqField +
-                ", neqField=" + neqField +
-                ", inField=" + inField +
-                ", notInField=" + notInField +
-                ", nullField=" + nullField +
-                ", notNullField=" + notNullField +
-                ", likeField=" + likeField +
-                ", notLikeField=" + notLikeField +
-                ", betweenField=" + betweenField +
-                ", notBetweenField=" + notBetweenField +
-                ", plusParam=" + plusParam +
-                ", groups=" + groups +
-                ", orderbyField=" + orderbyField +
-//				", distinctFieldList=" + distinctFieldList +
-                ", distinctField='" + distinctField + '\'' +
-//				", columnMap=" + columnMap +
-//				", extColumnMap=" + extColumnMap +
-                ", pageNo=" + pageNo +
-                ", pageSize=" + pageSize +
-                ", dataAmount=" + dataAmount +
-                ", startIdx=" + startIdx +
-                ", endIdx=" + endIdx +
-                ", alias='" + alias + '\'' +
-                '}';
-    }
-
-    //---------------------------------------------------------------------------------------
 
 }
