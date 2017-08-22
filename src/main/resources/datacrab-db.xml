@@ -17,6 +17,16 @@
 		</choose>
 	</sql>
 
+    <!-- 分组统计 -->
+	<sql id="groupBy_condition">
+		<if test="groupByField != null">
+			<![CDATA[ GROUP BY ]]>
+			<foreach collection="groupByField" index="col" item="val" separator=",">
+				<![CDATA[ ${val} ]]>
+			</foreach>
+		</if>
+	</sql>
+
 	<!-- 查询条件 -->
 	<sql id="where_condition">
 		<where>
